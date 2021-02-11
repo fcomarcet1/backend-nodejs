@@ -1,6 +1,6 @@
 'use strict';
 
-// Cargamos modulos
+// Load modules
 var express = require('express');
 var bodyParser = require('body-parser');
 
@@ -17,7 +17,6 @@ app.use(bodyParser.json());
 
 // Routes
 app.use('/api', project_routes);
-
 
 
 //Exports
