@@ -7,7 +7,7 @@ var ProjectSchema = schema({
     name: String,
     description: String,
     category: String,
-    language: String,
+    languages: String,
     year: Number,
     image: String
 });
