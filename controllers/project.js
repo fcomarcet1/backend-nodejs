@@ -32,7 +32,7 @@ var controller =
          * Store a newly created resource.
          *
          */
-        saveProject: function(req, res) {
+        saveProject: function (req, res) {
             /* Test method
             return res.status(200).send({
                 message: "saveProject controller from project: OK"
@@ -58,10 +58,10 @@ var controller =
             project.save((err, projectStored) => {
 
                 // Check errors
-                if(err) {
+                if (err) {
                     return res.status(500).send({message: 'Error al guardar el documento.'});
                 }
-                if(!projectStored) {
+                if (!projectStored) {
                     return res.status(404).send({message: 'No se ha podido guardar el proyecto.'});
                 }
 
@@ -77,28 +77,28 @@ var controller =
          * Display the specified resource.
          *
          */
-        getProject: function(req, res) {
+        getProject: function (req, res) {
 
             // Get Project Id from request
             var projectId = req.params.id;
 
             // Check if project exist
-            if(projectId == null){
+            if (projectId == null) {
                 return res.status(404).send({
                     message: "El proyecto no existe"
                 });
             }
 
             // Query to obtain data from the specific resource with the Id
-            Project.findById(projectId, (err, project)=>{
+            Project.findById(projectId, (err, project) => {
 
                 // Check possibles errors
-                if(err) {
+                if (err) {
                     return res.status(500).send({
                         message: 'Error al devolver los datos.'
                     });
                 }
-                if(!project) {
+                if (!project) {
                     return res.status(404).send({
                         message: 'El proyecto no existe.'
                     });
@@ -114,7 +114,7 @@ var controller =
          * Display list of specified resource => projects list.
          *
          */
-        getProjects: function(req, res){
+        getProjects: function (req, res) {
 
             // Query to obtain data from the specific resource.
             // Project.find({}).sort('-year').exec((err, projects) => {}
@@ -122,8 +122,8 @@ var controller =
             Project.find({}).exec((err, projects) => {
 
                 // Check possibles errors
-                if(err) return res.status(500).send({message: 'Error al devolver los datos.'});
-                if(!projects) return res.status(404).send({message: 'No hay projectos que mostrar.'});
+                if (err) return res.status(500).send({message: 'Error al devolver los datos.'});
+                if (!projects) return res.status(404).send({message: 'No hay projectos que mostrar.'});
 
                 // if everything is OK we return projects list
                 return res.status(200).send({projects});
@@ -134,18 +134,18 @@ var controller =
          * Update specified resource.
          *
          */
-        updateProject: function(req, res){
+        updateProject: function (req, res) {
 
             // Get Project Id from request && Received data from the body of the request.
             var projectId = req.params.id;
             var update = req.body;
 
             // Query to obtain data from the specific resource && update.
-            Project.findByIdAndUpdate(projectId, update, {new:true}, (err, projectUpdated) => {
+            Project.findByIdAndUpdate(projectId, update, {new: true}, (err, projectUpdated) => {
 
                 // Check possibles errors
-                if(err) return res.status(500).send({message: 'Error al actualizar'});
-                if(!projectUpdated) return res.status(404).send({message: 'No existe el proyecto para actualizar'});
+                if (err) return res.status(500).send({message: 'Error al actualizar'});
+                if (!projectUpdated) return res.status(404).send({message: 'No existe el proyecto para actualizar'});
 
                 // if everything is OK we return the updated project.
                 return res.status(200).send({
@@ -159,7 +159,7 @@ var controller =
          * Delete specified resource.
          *
          */
-        deleteProject: function(req, res){
+        deleteProject: function (req, res) {
 
             // Get Project Id from request
             var projectId = req.params.id;
@@ -168,8 +168,8 @@ var controller =
             Project.findByIdAndRemove(projectId, (err, projectRemoved) => {
 
                 // Check possibles errors
-                if(err) return res.status(500).send({message: 'No se ha podido borrar el proyecto'});
-                if(!projectRemoved) return res.status(404).send({message: "No se puede eliminar ese proyecto."});
+                if (err) return res.status(500).send({message: 'No se ha podido borrar el proyecto'});
+                if (!projectRemoved) return res.status(404).send({message: "No se puede eliminar ese proyecto."});
 
                 // if everything is OK we return the removed project.
                 return res.status(200).send({
@@ -178,9 +178,55 @@ var controller =
             });
         },
 
+        /**
+         * Upload image resource.
+         *
+         */
+        uploadImage: function (req, res) {
 
-    };
+            // Get Project Id from request
+            var projectId = req.params.id;
+            var fileName = "Image not found...";
 
+            // NOTE:  to use .files we need to install connect-multiparty(not default in nodejs)
+            if (req.files) {
 
+                // Test .files
+                /* console.log(req.files);
+                  return res.status(200).send({
+                        files: req.files
+                    });
+                */
+
+                // variables needed to save in the database
+                var filePath = req.files.image.path;
+
+                // We need the real name saved in disk for save in database i can use split
+                var fileSplit = filePath.split("\\"); // usamos el separador \\ para recortar
+                var fileName = fileSplit[1];
+                var extSplit = fileName.split(".");
+                var fileExt = extSplit[1];
+
+                // Check extension of image
+                if (fileExt == "png" || fileExt == "jpg" || fileExt == "jpeg" || fileExt == "gif") {
+
+                    Project.findByIdAndUpdate(projectId, (err, projectUpdate) => {
+                        // Check possibles errors
+                        if (err) return res.status(500).send({message: "La imagen no se ha subido"});
+                        if (!projectUpdated) return res.status(404).send({message: "El proyecto no existe y no se ha asignado la imagen",});
+
+                        // if everything is OK we return the updated project.
+                        return res.status(200).send({project: projectUpdated,});
+                    });
+                } else {
+                    // Error image type extension
+                    return res.status(404).send({
+                        message: "Extension image not supported"
+                    });
+                }
+            }
+        },
+
+    }
 // Module exports
 module.exports = controller;
