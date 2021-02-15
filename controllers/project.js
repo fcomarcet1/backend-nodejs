@@ -205,7 +205,14 @@ var controller = {
 
                 // Check extension of image
                 if (fileExt == "png" || fileExt == "jpg" || fileExt == "jpeg" || fileExt == "gif") {
+                    return  res.status(200).send({
+                        filesplit: fileSplit,
+                        filename: fileName,
+                        extSplit: extSplit,
+                        fileExt: fileExt
+                    })
 
+                    /*
                     // Query to find the project to associate for new image
                     Project.findByIdAndUpdate(
                         projectId,
@@ -220,21 +227,24 @@ var controller = {
                             return res.status(200).send({project: projectUpdated,});
                         });
 
+                     */
                 }
                 else {
                     // Error image type extension
-                    return res.status(404).send({
-                        message: "Extension image not supported"
+                    fs.unlink(filePath, (err) => {
+                        return res.status(200).send({ message: "La extensión no es válida" });
                     });
-                }
 
+                    /*return res.status(404).send({
+                        message: "Extension image not supported"
+                    });*/
+                }
             }
             else{
                 // Error req.files
                 return  res.status(404).send({message: 'Error to send file...'})
             }
         },
-
     }
 // Module exports
 module.exports = controller;
