@@ -205,13 +205,17 @@ var controller = {
 
                 // Check extension of image
                 if (fileExt == "png" || fileExt == "jpg" || fileExt == "jpeg" || fileExt == "gif") {
-                    return  res.status(200).send({
-                        filesplit: fileSplit,
-                        filename: fileName,
-                        extSplit: extSplit,
-                        fileExt: fileExt
-                    })
 
+                    // Query to find the project to associate for new upload image.
+                    Project.findByIdAndUpdate(projectId, { image: fileName }, { new: true }, (err, projectUpdated) => {
+
+                            // Check errors
+                            if (err) return res.status(500).send({message: "La imagen no se ha subido"});
+                            if (!projectUpdated) return res.status(404).send({message: "El proyecto no existe y no se ha asignado la imagen",});
+
+                            // if everything is OK we return the updated project.
+                            return res.status(200).send({project: projectUpdated,});
+                        });
                     /*
                     // Query to find the project to associate for new image
                     Project.findByIdAndUpdate(
@@ -230,7 +234,7 @@ var controller = {
                      */
                 }
                 else {
-                    // Error image type extension
+                    // Error image type extension => unlink to uploads
                     fs.unlink(filePath, (err) => {
                         return res.status(200).send({ message: "La extensión no es válida" });
                     });
