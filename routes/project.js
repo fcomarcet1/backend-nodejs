@@ -9,7 +9,6 @@ var multipart = require("connect-multiparty");
 var multipartMiddleware = multipart({ uploadDir: "./uploads" });
 
 
-
 /*
 ******************** ROUTES ************************************
 ****************************************************************
@@ -24,7 +23,7 @@ router.get('/projects', ProjectController.getProjects);
 router.put('/project/:id', ProjectController.updateProject);
 router.delete("/project/:id", ProjectController.deleteProject);
 
-// upload image
+// upload files
 router.post("/upload-image/:id", multipartMiddleware, ProjectController.uploadImage);
 
 // Module exports

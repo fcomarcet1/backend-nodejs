@@ -1,9 +1,10 @@
 'use strict';
 
 var Project = require('../models/project');
+var fs = require("fs");
+var path = require("path");
 
-var controller =
-    {
+var controller = {
         // Methods
         /**
          * @param {any} req
@@ -50,7 +51,7 @@ var controller =
             project.category = params.category;
             project.year = params.year;
             project.languages = params.languages;
-            project.image = null;
+            project.image = "";
 
             console.log(project);
 
@@ -190,13 +191,7 @@ var controller =
 
             // NOTE:  to use .files we need to install connect-multiparty(not default in nodejs)
             if (req.files) {
-
-                // Test .files
-                /* console.log(req.files);
-                  return res.status(200).send({
-                        files: req.files
-                    });
-                */
+                //return  res.status(200).send({files: req.files})
 
                 // variables needed to save in the database
                 var filePath = req.files.image.path;
@@ -204,26 +199,39 @@ var controller =
                 // We need the real name saved in disk for save in database i can use split
                 var fileSplit = filePath.split("\\"); // usamos el separador \\ para recortar
                 var fileName = fileSplit[1];
-                var extSplit = fileName.split(".");
-                var fileExt = extSplit[1];
+                var extSplit = fileName.split("."); // cut string for extension.
+                var fileExt = extSplit[1]; // extension
+                //return  res.status(200).send({filesplit: fileSplit,filename: fileName,extSplit: extSplit,fileExt: fileExt })
 
                 // Check extension of image
                 if (fileExt == "png" || fileExt == "jpg" || fileExt == "jpeg" || fileExt == "gif") {
 
-                    Project.findByIdAndUpdate(projectId, (err, projectUpdate) => {
-                        // Check possibles errors
-                        if (err) return res.status(500).send({message: "La imagen no se ha subido"});
-                        if (!projectUpdated) return res.status(404).send({message: "El proyecto no existe y no se ha asignado la imagen",});
+                    // Query to find the project to associate for new image
+                    Project.findByIdAndUpdate(
+                        projectId,
+                        { image: fileName },
+                        { new: true },
+                        (err, projectUpdate) => {
+                            // Check errors
+                            if (err) return res.status(500).send({message: "La imagen no se ha subido"});
+                            if (!projectUpdated) return res.status(404).send({message: "El proyecto no existe y no se ha asignado la imagen",});
 
-                        // if everything is OK we return the updated project.
-                        return res.status(200).send({project: projectUpdated,});
-                    });
-                } else {
+                            // if everything is OK we return the updated project.
+                            return res.status(200).send({project: projectUpdated,});
+                        });
+
+                }
+                else {
                     // Error image type extension
                     return res.status(404).send({
                         message: "Extension image not supported"
                     });
                 }
+
+            }
+            else{
+                // Error req.files
+                return  res.status(404).send({message: 'Error to send file...'})
             }
         },
 
